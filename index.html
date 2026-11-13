@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PermisosLab — Simulador Nativo de Permisos Windows &amp; Linux</title>
+    <meta
+      name="description"
+      content="Laboratorio interactivo pixel-perfect de administración de permisos NTFS/SMB en Windows Server y permisos POSIX/Octal/ACL en terminal bash de Ubuntu Server. Creado para Un Fantasma en el Sistema."
+    />
+    <meta property="og:title" content="PermisosLab — Simulador Nativo de Permisos Windows &amp; Linux" />
+    <meta
+      property="og:description"
+      content="Laboratorio interactivo pixel-perfect de administración de permisos NTFS/SMB en Windows Server y permisos POSIX/Octal/ACL en terminal bash de Ubuntu Server."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/png" href="./assets/aistudio/icono_81a3db5b.png" />
+
+    <!-- Tipografías nativas para UI, Ubuntu y Terminal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400&family=Ubuntu:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Hojas de estilo modulares (100% compatibles con GitHub Pages) -->
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/windows.css" />
+    <link rel="stylesheet" href="./css/linux.css" />
+  </head>
+  <body>
+    <!-- ====================================================================
+          BARRA SUPERIOR DE LABORATORIO (3-Zone Top Bar Contract)
+          ==================================================================== -->
+    <header class="lab-topbar">
+      <div class="lab-brand-group">
+        <a id="nav-brand" class="lab-brand" title="Volver al Selector de Sistema">
+          <img
+            src="./assets/aistudio/icono_81a3db5b.png"
+            alt="Logo Un Fantasma en el Sistema"
+            class="brand-ghost-logo"
+          />
+          <span>PermisosLab</span>
+        </a>
+        <span class="lab-brand-sep">·</span>
+        <a
+          href="https://www.unfantasmaenelsistema.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="lab-author-link"
+          title="Visitar Un Fantasma en el Sistema"
+        >
+          unfantasmaenelsistema.com &#8599;
+        </a>
+      </div>
+
+      <nav class="lab-nav" aria-label="Selector de entorno operativo">
+        <button type="button" id="nav-selector" class="lab-nav-link active">Selector de Sistema</button>
+        <button type="button" id="nav-windows" class="lab-nav-link">Windows Server</button>
+        <button type="button" id="nav-linux" class="lab-nav-link">Ubuntu Server</button>
+        <button type="button" id="btn-open-guide" class="lab-nav-link">Guía &amp; Chuleta</button>
+      </nav>
+
+      <div class="lab-topbar-actions">
+        <button type="button" id="btn-open-code" class="lab-primary-btn">Código &amp; README</button>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+          VISTA 1: SELECTOR DE ENTORNO INICIAL (PANTALLA DE LOGIN DOBLE)
+          ==================================================================== -->
+    <main id="view-selector" class="os-selector-screen">
+      <!-- Lado Izquierdo: Windows Server 2022 -->
+      <section class="os-login-pane win-pane" aria-label="Iniciar sesión en Windows Server">
+        <div class="os-pane-header">
+          <span>Microsoft Windows Server 2022 Datacenter</span>
+          <span>NTFS · ACL · SMB Share</span>
+        </div>
+
+        <div class="os-login-card">
+          <div class="win-login-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"
+              />
+            </svg>
+          </div>
+          <h1 class="win-login-user">Administrador</h1>
+          <p class="win-login-domain">DOMINIO: WIN-SRV01\Administrator</p>
+
+          <div class="win-login-input-row">
+            <input
+              id="win-pin-input"
+              type="password"
+              class="win-login-input"
+              value="••••••••••••"
+              aria-label="Contraseña de Administrador de Windows"
+              placeholder="Contraseña o PIN"
+            />
+            <button
+              type="button"
+              id="btn-submit-win-pin"
+              class="win-login-submit"
+              title="Iniciar sesión en Windows Server"
+            >
+              &#10140;
+            </button>
+          </div>
+
+          <button type="button" id="btn-enter-windows" class="win-enter-btn">
+            Entrar a Windows Server
+          </button>
+
+          <p class="os-feature-summary">
+            Simulador nativo Win32 de cuadros de diálogo de Propiedades, pestañas de Seguridad NTFS, Herencia de ACL, Denegación Explícita y Permisos de Uso Compartido SMB (5 Tickets Reales).
+          </p>
+        </div>
+
+        <div class="os-pane-footer">
+          <span>Compilación 20348.2655</span>
+          <span>5 Tickets Help Desk · NTFS ∩ SMB</span>
+        </div>
+      </section>
+
+      <!-- Lado Derecho: Ubuntu Server 24.04 LTS -->
+      <section class="os-login-pane linux-pane" aria-label="Iniciar sesión en Ubuntu Server">
+        <div class="os-pane-header">
+          <span>Ubuntu Server 24.04.1 LTS (Noble Numbat)</span>
+          <span>POSIX · Octal · SUID/SGID/Sticky</span>
+        </div>
+
+        <div class="os-login-card">
+          <div class="ubuntu-login-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+          </div>
+          <h2 class="ubuntu-login-user">alumno@ubuntu-server</h2>
+          <p class="ubuntu-login-host">tty1 · GNU bash 5.2.21 · /var/www</p>
+
+          <div class="ubuntu-tty-preview">
+            <div>Ubuntu 24.04.1 LTS ubuntu-server tty1</div>
+            <div>ubuntu-server login: <span style="color:#8ae234;font-weight:700;">alumno</span></div>
+            <div>Password: ••••••••••</div>
+            <div style="color:#729fcf;">alumno@ubuntu-server:/var/www$ ls -l</div>
+          </div>
+
+          <button type="button" id="btn-enter-linux" class="ubuntu-enter-btn">
+            Entrar a Ubuntu Server
+          </button>
+
+          <p class="os-feature-summary">
+            Emulador interactivo de terminal GNOME Bash con UGO tradicional, bits especiales (SUID/SGID/Sticky) y ACLs POSIX extendidas (<code>getfacl</code>, <code>setfacl</code>, <code>mask::</code> y <code>su - [usuario]</code>).
+          </p>
+        </div>
+
+        <div class="os-pane-footer">
+          <span>Kernel Linux 6.8.0-48-generic x86_64</span>
+          <span>5 Tickets Help Desk · POSIX ACLs</span>
+        </div>
+      </section>
+
+      <!-- Barra flotante inferior de Autoría: Un Fantasma en el Sistema -->
+      <div class="os-author-dock">
+        <a
+          href="https://www.unfantasmaenelsistema.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="os-author-card"
+        >
+          <img
+            src="./assets/aistudio/icono_81a3db5b.png"
+            alt="Un Fantasma en el Sistema"
+            class="os-author-logo"
+          />
+          <div class="os-author-meta">
+            <span class="os-author-title">Un Fantasma en el Sistema</span>
+            <span class="os-author-url">https://www.unfantasmaenelsistema.com/ &#8599;</span>
+          </div>
+        </a>
+      </div>
+    </main>
+
+    <!-- ====================================================================
+          VISTA 2: ESPACIO DE TRABAJO INTERACTIVO (SANDBOX + RETOS)
+          ==================================================================== -->
+    <div id="view-workspace" class="os-workspace hidden">
+      <!-- ZONA IZQUIERDA: ESCENARIO NATIVO DEL SISTEMA OPERATIVO -->
+      <div id="os-stage-container">
+        <!-- ================================================================
+              ENTORNO A: WINDOWS SERVER 10/11 PIXEL-PERFECT DIALOGS
+              ================================================================ -->
+        <section id="stage-windows" class="win-desktop-stage hidden" aria-label="Escritorio de Windows Server">
+          <div class="win-desktop-workspace">
+            <!-- Ventana 1: Explorador de Archivos de Windows Server -->
+            <div class="win-window">
+              <div class="win-titlebar">
+                <div class="win-titlebar-left">
+                  <svg class="win-titlebar-icon" viewBox="0 0 16 16" fill="#f8d775">
+                    <path
+                      d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3.793a1.5 1.5 0 0 1 1.06.44l.94.94a.5.5 0 0 0 .354.146H13.5A1.5 1.5 0 0 1 15 4.026v8.474A1.5 1.5 0 0 1 13.5 14h-11A1.5 1.5 0 0 1 1 12.5v-10z"
+                      stroke="#c99c33"
+                      stroke-width="0.9"
+                    />
+                  </svg>
+                  <span class="win-titlebar-text">Explorador de archivos — Recursos del Servidor</span>
+                </div>
+                <div class="win-titlebar-controls">
+                  <button type="button" class="win-caption-btn" title="Minimizar">&#8722;</button>
+                  <button type="button" class="win-caption-btn" title="Maximizar">&#9633;</button>
+                </div>
+              </div>
+
+              <div class="win-explorer-ribbon">
+                <span>Archivo</span>
+                <span>·</span>
+                <span>Inicio</span>
+                <span>·</span>
+                <span>Compartir</span>
+                <span>·</span>
+                <span>Vista</span>
+              </div>
+
+              <div class="win-address-bar">
+                <span style="color:#666666;">Dirección:</span>
+                <strong id="win-explorer-address">C:\Empresa\RRHH</strong>
+              </div>
+
+              <div class="win-explorer-body">
+                <div style="font-size:11px;color:#555555;padding:2px 6px 6px;">
+                  Selecciona un objeto para inspeccionar sus Propiedades NTFS / SMB:
+                </div>
+                <div id="win-resource-list"></div>
+
+                <!-- Simulador de Prueba de Acceso en Vivo (como usuario de dominio) -->
+                <div id="win-live-access-tester" class="win-access-tester"></div>
+              </div>
+
+              <div class="win-explorer-status">
+                <span id="win-explorer-count">5 objetos del servidor</span>
+                <span>Volumen local (NTFS)</span>
+              </div>
+            </div>
+
+            <!-- Ventana Modal 1: Cuadro de Diálogo Nativo Win32 "Propiedades de [Carpeta]" -->
+            <div id="win-properties-modal" class="win-window win-dialog-container" role="dialog" aria-labelledby="win-dialog-title">
+              <div class="win-titlebar">
+                <div class="win-titlebar-left">
+                  <svg class="win-titlebar-icon" viewBox="0 0 16 16" fill="#0078d7">
+                    <rect x="2" y="2" width="12" height="12" fill="#ffffff" stroke="#0078d7" stroke-width="1.4" />
+                    <path d="M5 5h6M5 8h6M5 11h4" stroke="#0078d7" stroke-width="1.2" />
+                  </svg>
+                  <span id="win-dialog-title" class="win-titlebar-text">Propiedades de Nominas_2026.xlsx</span>
+                </div>
+                <div class="win-titlebar-controls">
+                  <button type="button" class="win-caption-btn close-btn" title="Cerrar">✕</button>
+                </div>
+              </div>
+
+              <div class="win-dialog-body">
+                <!-- Pestañas Nativas Win32: Compartir y Seguridad -->
+                <div class="win-tabs" role="tablist">
+                  <button type="button" class="win-tab" data-win-tab="sharing">Compartir</button>
+                  <button type="button" class="win-tab active" data-win-tab="security">Seguridad</button>
+                </div>
+
+                <!-- Hoja de contenido de la pestaña activa -->
+                <div id="win-tab-sheet" class="win-tab-sheet"></div>
+              </div>
+
+              <!-- Botonera inferior estándar de Windows -->
+              <div class="win-dialog-footer">
+                <button type="button" id="win-btn-ok" class="win-btn win-btn-default">Aceptar</button>
+                <button type="button" id="win-btn-cancel" class="win-btn">Cancelar / Reiniciar</button>
+                <button type="button" id="win-btn-apply" class="win-btn" disabled>Aplicar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ventana Modal 2 (Apilada): "Configuración de seguridad avanzada para [Carpeta]" -->
+          <div id="win-advanced-modal-overlay" class="win-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="win-adv-dialog-title">
+            <div class="win-advanced-window">
+              <div class="win-titlebar">
+                <div class="win-titlebar-left">
+                  <svg class="win-titlebar-icon" viewBox="0 0 16 16" fill="#0078d7">
+                    <path d="M8 1L2 3.5v4.8c0 3.7 2.6 6.1 6 6.7 3.4-.6 6-3 6-6.7V3.5L8 1z" fill="#0078d7" />
+                    <path d="M8 2.4v11.1c2.6-.5 4.7-2.5 4.7-5.2V4.4L8 2.4z" fill="#4cc2ff" />
+                  </svg>
+                  <span id="win-adv-dialog-title" class="win-titlebar-text">
+                    Configuración de seguridad avanzada para Nominas_2026.xlsx
+                  </span>
+                </div>
+                <div class="win-titlebar-controls">
+                  <button type="button" id="win-adv-close-x" class="win-caption-btn close-btn" title="Cerrar">✕</button>
+                </div>
+              </div>
+
+              <!-- Cabecera de Nombre y Propietario de Configuración Avanzada -->
+              <div id="win-adv-header-meta" class="win-adv-header-meta"></div>
+
+              <div class="win-dialog-body">
+                <!-- Pestañas Nativas de Configuración Avanzada: Permisos y Acceso efectivo -->
+                <div class="win-tabs" role="tablist">
+                  <button type="button" class="win-tab" data-win-adv-tab="adv_permissions">Permisos</button>
+                  <button type="button" class="win-tab active" data-win-adv-tab="adv_effective">Acceso efectivo</button>
+                </div>
+
+                <!-- Contenido de la pestaña avanzada activa -->
+                <div id="win-adv-tab-sheet" class="win-tab-sheet" style="min-height:360px;"></div>
+              </div>
+
+              <div class="win-dialog-footer">
+                <button type="button" id="win-adv-btn-ok" class="win-btn win-btn-default">Aceptar</button>
+                <button type="button" id="win-adv-btn-cancel" class="win-btn">Cancelar</button>
+                <button type="button" id="win-adv-btn-apply" class="win-btn">Aplicar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de tareas de Windows Server -->
+          <footer class="win-taskbar">
+            <div class="win-taskbar-left">
+              <button type="button" class="win-start-btn" title="Inicio de Windows Server">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M0 2.3l6.5-.9v6.2H0V2.3zm7.3-1l8.7-1.3v7.6H7.3V1.3zM0 8.4h6.5v6.2L0 13.7V8.4zm7.3 0H16V16l-8.7-1.3V8.4z" />
+                </svg>
+              </button>
+              <div class="win-taskbar-item">
+                <span>Explorador de archivos</span>
+              </div>
+              <div class="win-taskbar-item">
+                <span id="win-taskbar-prop-label">Propiedades de Nominas_2026.xlsx</span>
+              </div>
+            </div>
+            <div class="win-taskbar-tray">
+              <span>ES</span>
+              <span id="win-tray-clock" class="tabular-nums">09:30 · 12/11/2026</span>
+            </div>
+          </footer>
+        </section>
+
+        <!-- ================================================================
+              ENTORNO B: UBUNTU SERVER 24.04 LTS BASH TERMINAL EMULATOR
+              ================================================================ -->
+        <section id="stage-linux" class="linux-desktop-stage hidden" aria-label="Entorno de terminal Ubuntu Server">
+          <!-- Panel superior Yaru de Ubuntu -->
+          <div class="ubuntu-top-panel">
+            <div class="ubuntu-panel-left">
+              <strong>Actividades</strong>
+              <span>Terminal — alumno@ubuntu-server:/var/www</span>
+            </div>
+            <div id="ubuntu-panel-clock" class="ubuntu-panel-clock">12 nov 10:00</div>
+            <div class="ubuntu-panel-right">
+              <span>eth0: 10.24.0.15</span>
+              <span>ubuntu-server</span>
+            </div>
+          </div>
+
+          <!-- Ventana de GNOME Terminal -->
+          <div class="ubuntu-terminal-window">
+            <div class="ubuntu-headerbar">
+              <div class="ubuntu-headerbar-left">
+                <button type="button" class="ubuntu-tab-new-btn" data-linux-cmd="ls -l" title="Ejecutar ls -l">+</button>
+              </div>
+              <div id="ubuntu-header-title" class="ubuntu-headerbar-title">
+                alumno@ubuntu-server: /var/www
+              </div>
+              <div class="ubuntu-window-controls">
+                <span class="ubuntu-win-circle" title="Minimizar">&#8722;</span>
+                <span class="ubuntu-win-circle" title="Maximizar">&#9633;</span>
+                <span class="ubuntu-win-circle close" title="Cerrar">✕</span>
+              </div>
+            </div>
+
+            <!-- Barra de menú de GNOME Terminal + Atajos de Comandos ACL / UGO -->
+            <div class="ubuntu-menubar">
+              <div class="ubuntu-menu-items">
+                <span class="ubuntu-menu-item" data-linux-cmd="ls -l">Archivo</span>
+                <span class="ubuntu-menu-item" data-linux-cmd="getfacl html">ACL (getfacl)</span>
+                <span class="ubuntu-menu-item" data-linux-cmd="id">Identidad</span>
+                <span class="ubuntu-menu-item" data-linux-cmd="help">Ayuda</span>
+              </div>
+              <div class="ubuntu-toolbar-actions">
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="ls -l">ls -l</button>
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="getfacl html">getfacl html</button>
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="su - jdoe">su - jdoe</button>
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="touch html/test.txt">touch html/test.txt</button>
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="su - alumno">su - alumno</button>
+                <button type="button" id="btn-toggle-ubuntu-theme" class="ubuntu-mini-btn">
+                  Fondo #300a24 / #0c0c0c
+                </button>
+              </div>
+            </div>
+
+            <!-- Área interactiva de consola Bash -->
+            <div id="ubuntu-term-viewport" class="ubuntu-term-body">
+              <div id="linux-output-lines"></div>
+              <div class="term-input-line">
+                <span id="linux-active-prompt" class="term-prompt-wrap"></span>
+                <input
+                  id="linux-cmd-input"
+                  type="text"
+                  class="term-cmd-input"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  aria-label="Entrada de comandos bash de Ubuntu"
+                  placeholder="Escribe ls -l, getfacl html, setfacl -m u:jdoe:rwx html, chmod, chown, su - jdoe o touch..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel inferior sincronizado: Matriz de Bits POSIX, Calculadora Octal y Visor ACL -->
+          <div class="linux-inspector-panel">
+            <div class="linux-file-selector-box">
+              <div style="font-size:12px;color:#babdb6;margin-bottom:2px;">
+                Inodos en <code>/var/www</code>:
+              </div>
+              <div id="linux-inspector-files" style="display:flex;flex-direction:column;gap:5px;"></div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:#babdb6;margin-bottom:8px;">
+                Matriz interactiva de 12 bits POSIX + Estado de Máscara ACL (sincronizada con <code>chmod</code>, <code>chown</code> y <code>setfacl</code>):
+              </div>
+              <div id="linux-posix-matrix-content"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ZONA DERECHA: PANEL DE ESCENARIOS Y VERIFICACIÓN -->
+      <aside id="lab-control-deck" class="lab-control-deck" aria-label="Retos y objetivos del laboratorio"></aside>
+    </div>
+
+    <!-- ====================================================================
+          MODAL 1: GUÍA TEÓRICA & CHULETA DE ADMINISTRACIÓN DE PERMISOS
+          ==================================================================== -->
+    <div id="guide-modal-backdrop" class="code-modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="code-modal" style="max-width:980px;height:84vh;">
+        <div class="code-modal-header">
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <img
+              src="./assets/aistudio/icono_81a3db5b.png"
+              alt="Un Fantasma en el Sistema"
+              class="brand-ghost-logo"
+            />
+            <div>
+              <strong style="font-size:0.95rem;color:#f8fafc;">
+                Guía Teórica &amp; Chuleta Rápida — Windows NTFS/SMB y Linux POSIX/ACL
+              </strong>
+              <span style="font-size:0.76rem;color:#94a3b8;display:block;">
+                Material didáctico interactivo · Un Fantasma en el Sistema
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="btn-close-guide"
+            class="deck-btn"
+            style="padding:0.38rem 0.85rem;flex:none;"
+          >
+            Cerrar Guía
+          </button>
+        </div>
+
+        <div class="guide-modal-body">
+          <div class="guide-grid">
+            <div class="guide-card">
+              <h3>1. Reglas de Evaluación en Windows Server (NTFS + SMB)</h3>
+              <p>
+                Cuando un usuario accede a un recurso en Windows Server, el subsistema de seguridad (SRM) evalúa los permisos siguiendo tres leyes estrictas:
+              </p>
+              <ul>
+                <li>
+                  <strong>Unión de Grupos:</strong> El usuario acumula los permisos concedidos a su cuenta individual más todos los grupos a los que pertenece (<code>mgarcia ∪ Ventas_Group ∪ Users</code>).
+                </li>
+                <li>
+                  <strong>Precedencia de ACEs:</strong> Las entradas explícitas tienen prioridad sobre las heredadas, y <strong>Denegar prevalece sobre Permitir</strong> en el mismo nivel:
+                  <code>1º Deny Explícito &gt; 2º Allow Explícito &gt; 3º Deny Heredado &gt; 4º Allow Heredado</code>.
+                </li>
+                <li>
+                  <strong>Intersección Share SMB &#8745; NTFS:</strong> Al acceder por red (<code>\\WIN-SRV01\Carpeta</code>), el permiso efectivo final es el <strong>más restrictivo</strong> entre el permiso de la pestaña <em>Compartir</em> y la pestaña <em>Seguridad (NTFS)</em>.
+                </li>
+              </ul>
+              <pre class="guide-pre"># Ver ACL en consola de Windows:
+icacls "C:\Empresa\RRHH\Nominas_2026.xlsx"
+
+# Deshabilitar herencia convirtiendo en explícitos y dar Modificar a RRHH:
+icacls "C:\Empresa\RRHH\Nominas_2026.xlsx" /inheritance:d /grant "EMPRESA\RRHH_Group":(M) /remove:g "WIN-SRV01\Users"</pre>
+            </div>
+
+            <div class="guide-card">
+              <h3>2. Permisos Tradicionales UGO y Bits Especiales en Linux</h3>
+              <p>
+                Cada inodo almacena 12 bits de modo divididos en 4 octetos: <strong>Especiales (4/2/1)</strong>, <strong>Propietario u (4/2/1)</strong>, <strong>Grupo g (4/2/1)</strong> y <strong>Otros o (4/2/1)</strong>.
+              </p>
+              <ul>
+                <li>
+                  <strong>SUID (Octal <code>4000</code> · <code>chmod u+s</code>):</strong> En ejecutables binarios, el proceso se ejecuta con el <code>EUID</code> del propietario del fichero (p. ej. <code>root</code>). Se muestra como <code>rws</code> en el propietario.
+                </li>
+                <li>
+                  <strong>SGID (Octal <code>2000</code> · <code>chmod g+s</code>):</strong> En directorios (p. ej. <code>/var/www/html</code>), hace que todos los archivos y subdirectorios nuevos creados dentro hereden automáticamente el grupo del directorio contenedor.
+                </li>
+                <li>
+                  <strong>Sticky Bit (Octal <code>1000</code> · <code>chmod +t</code>):</strong> En directorios compartidos (como <code>/tmp</code> o <code>/var/www/compartido</code>), impide que un usuario borre o renombre archivos que pertenezcan a otros usuarios. Se muestra como <code>rwt</code> al final.
+                </li>
+              </ul>
+              <pre class="guide-pre"># Directorio web colaborativo con SGID activo:
+sudo chown -R :www-data /var/www/html
+sudo chmod 2775 /var/www/html
+
+# Directorio compartido protegido con Sticky Bit:
+sudo chmod 1777 /var/www/compartido</pre>
+            </div>
+
+            <div class="guide-card">
+              <h3>3. Listas de Control de Acceso POSIX (<code>getfacl</code> / <code>setfacl</code>)</h3>
+              <p>
+                Cuando UGO no basta para dar acceso a usuarios o grupos concretos, se emplean ACLs extendidas (indicadas con un signo <code>+</code> al final de <code>ls -l</code>, ej. <code>drwxrwsr-x+</code>).
+              </p>
+              <ul>
+                <li>
+                  <strong>La Máscara ACL (<code>mask::</code>):</strong> Define el <strong>permiso máximo efectivo</strong> para todos los usuarios nombrados (<code>user:nombre:</code>), grupos nombrados (<code>group:nombre:</code>) y el grupo propietario (<code>group::</code>).
+                </li>
+                <li>
+                  <strong>Atención con <code>chmod</code> sobre archivos con ACL:</strong> Ejecutar <code>chmod</code> después de <code>setfacl</code> modifica <code>mask::</code>, pudiendo dejar entradas con <code>#effective:r-x</code> aunque tengan <code>rwx</code> asignado.
+                </li>
+              </ul>
+              <pre class="guide-pre"># Inspeccionar ACL y permisos efectivos:
+getfacl /var/www/html
+
+# Dar rwx al usuario jdoe y recalcular la máscara a rwx:
+sudo setfacl -m u:jdoe:rwx /var/www/html
+sudo setfacl -m m::rwx /var/www/html
+
+# Dar solo lectura a un auditor externo sobre un fichero sensible:
+sudo setfacl -m u:auditor:r-- /var/www/config.php</pre>
+            </div>
+
+            <div class="guide-card">
+              <h3>4. Resumen de los 10 Tickets Reales del Help Desk</h3>
+              <p>
+                Cada ticket simula una incidencia real de administración de sistemas que puedes verificar en tiempo real:
+              </p>
+              <ul>
+                <li><strong>INC-4081 (Win):</strong> Conflicto entre Share SMB en <em>Leer</em> y NTFS en <code>Presupuesto_Ventas.xlsx</code>.</li>
+                <li><strong>INC-4085 (Win):</strong> Denegación explícita en <code>Users</code> bloqueando a un miembro de <code>Finanzas_Group</code>.</li>
+                <li><strong>INC-4090 (Win):</strong> Ruptura de herencia NTFS y blindaje de <code>Nominas_2026.xlsx</code> para <code>RRHH_Group</code>.</li>
+                <li><strong>INC-4094 (Win):</strong> Permisos de <em>Lectura y ejecución</em> para <code>DevOps_Group</code> en script crítico de producción.</li>
+                <li><strong>INC-4099 (Win):</strong> Publicación SMB y acceso colaborativo interdepartamental en <code>Proyectos_2026</code>.</li>
+                <li><strong>INC-5102 (Linux):</strong> Permisos de Apache (<code>www-data</code>) y herencia de grupo con bit <strong>SGID (2775)</strong>.</li>
+                <li><strong>INC-5108 (Linux):</strong> Diagnóstico de bloqueo por máscara POSIX ACL (<code>mask::r-x</code> vs <code>u:jdoe:rwx</code>).</li>
+                <li><strong>INC-5115 (Linux):</strong> Protección contra borrado cruzado con <strong>Sticky Bit (1777)</strong> y blindaje de <code>deploy.sh</code>.</li>
+                <li><strong>INC-5120 (Linux):</strong> Elevación controlada con bit <strong>SUID (4755)</strong> en binario <code>bin_healthcheck</code>.</li>
+                <li><strong>INC-5125 (Linux):</strong> Hardening <code>0640</code> de <code>config.php</code> + acceso puntual a <code>auditor</code> con <code>setfacl</code>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+          MODAL 2: INSPECCIÓN DE CÓDIGO FUENTE Y README PARA GITHUB PAGES
+          ==================================================================== -->
+    <div id="code-modal-backdrop" class="code-modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="code-modal">
+        <div class="code-modal-header">
+          <div>
+            <strong style="font-size:0.95rem;color:#f8fafc;">Estructura Estática para GitHub Pages</strong>
+            <span style="font-size:0.78rem;color:#94a3b8;margin-left:0.75rem;">
+              README.md · index.html · css/*.css · js/*.js
+            </span>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button type="button" id="btn-copy-code" class="lab-primary-btn">Copiar Archivo</button>
+            <button
+              type="button"
+              id="btn-close-code"
+              class="deck-btn"
+              style="padding:0.38rem 0.75rem;flex:none;"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+        <div id="code-file-tabs" class="code-file-tabs"></div>
+        <pre id="code-viewer-pre" class="code-viewer-pre"></pre>
+      </div>
+    </div>
+
+    <!-- Script controlador principal (ES Modules nativo) -->
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

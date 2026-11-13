@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <rect x="0" y="0" width="1200" height="675" fill="#1d0818" />
+
+  <!-- Ubuntu Top Panel -->
+  <rect x="0" y="0" width="1200" height="32" fill="#111111" />
+  <text x="20" y="21" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="700">Actividades</text>
+  <text x="120" y="21" fill="#babdb6" font-family="Ubuntu, sans-serif" font-size="13">Terminal — alumno@ubuntu-server:/var/www</text>
+  <text x="600" y="21" text-anchor="middle" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="500">12 nov 10:00</text>
+  <text x="1180" y="21" text-anchor="end" fill="#babdb6" font-family="Ubuntu, sans-serif" font-size="13">eth0: 10.24.0.15 · ubuntu-server</text>
+
+  <!-- GNOME Terminal Window -->
+  <rect x="30" y="48" width="1140" height="415" rx="8" fill="#300a24" stroke="#454545" stroke-width="1.5" />
+  <rect x="30" y="48" width="1140" height="38" rx="8" fill="#2b2b2b" />
+  <text x="600" y="72" text-anchor="middle" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="700">alumno@ubuntu-server: /var/www</text>
+  <circle cx="1148" cy="67" r="9" fill="#e95420" />
+  <text x="1148" y="71" text-anchor="middle" fill="#ffffff" font-family="Ubuntu, sans-serif" font-size="10">✕</text>
+
+  <!-- Terminal Output -->
+  <text x="52" y="114" fill="#8ae234" font-family="Ubuntu Mono, monospace" font-size="15" font-weight="700">alumno@ubuntu-server</text>
+  <text x="218" y="114" fill="#729fcf" font-family="Ubuntu Mono, monospace" font-size="15" font-weight="700">:/var/www$</text>
+  <text x="310" y="114" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="15">ls -l</text>
+
+  <text x="52" y="140" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14.5">drwxrwsr-x+ 2 root     www-data  4096 Nov 12 10:00 </text>
+  <text x="480" y="140" fill="#729fcf" font-family="Ubuntu Mono, monospace" font-size="14.5" font-weight="700">html</text>
+  <text x="52" y="164" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14.5">-rwxr-x---  1 root     www-data  2480 Nov 12 09:45 </text>
+  <text x="480" y="164" fill="#8ae234" font-family="Ubuntu Mono, monospace" font-size="14.5" font-weight="700">deploy.sh</text>
+  <text x="52" y="188" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14.5">drwxrwxrwt  2 root     www-data  4096 Nov 12 09:50 </text>
+  <text x="480" y="188" fill="#8ae234" font-family="Ubuntu Mono, monospace" font-size="14.5" font-weight="700">compartido</text>
+
+  <text x="52" y="224" fill="#8ae234" font-family="Ubuntu Mono, monospace" font-size="15" font-weight="700">alumno@ubuntu-server</text>
+  <text x="218" y="224" fill="#729fcf" font-family="Ubuntu Mono, monospace" font-size="15" font-weight="700">:/var/www$</text>
+  <text x="310" y="224" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="15">getfacl html</text>
+
+  <text x="52" y="250" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14"># file: html</text>
+  <text x="52" y="270" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14"># owner: root</text>
+  <text x="52" y="290" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14"># group: www-data</text>
+  <text x="52" y="310" fill="#fce94f" font-family="Ubuntu Mono, monospace" font-size="14"># flags: -s-</text>
+  <text x="52" y="330" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14">user::rwx</text>
+  <text x="52" y="350" fill="#8ae234" font-family="Ubuntu Mono, monospace" font-size="14">user:jdoe:rwx</text>
+  <text x="52" y="370" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14">group::rwx</text>
+  <text x="52" y="390" fill="#fce94f" font-family="Ubuntu Mono, monospace" font-size="14">mask::rwx</text>
+  <text x="52" y="410" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="14">other::r-x</text>
+
+  <!-- Synchronized 12-bit POSIX Matrix Panel -->
+  <rect x="30" y="480" width="1140" height="170" rx="6" fill="#202020" stroke="#3c3c3c" />
+  <text x="50" y="506" fill="#babdb6" font-family="Ubuntu, sans-serif" font-size="13">Matriz interactiva de 12 bits POSIX + Calculadora Octal (Sincronizada con chmod, chown y setfacl):</text>
+
+  <rect x="50" y="520" width="255" height="90" rx="5" fill="#181818" stroke="#383838" />
+  <text x="66" y="546" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="700">Especiales (SUID/SGID/Sticky)</text>
+  <text x="285" y="548" text-anchor="end" fill="#e95420" font-family="Ubuntu Mono, monospace" font-size="22" font-weight="700">2</text>
+  <text x="66" y="576" fill="#8ae234" font-family="Ubuntu Mono, monospace" font-size="12.5">✓ SGID (2000 · g+s activo)</text>
+
+  <rect x="320" y="520" width="255" height="90" rx="5" fill="#181818" stroke="#383838" />
+  <text x="336" y="546" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="700">Propietario (u)</text>
+  <text x="555" y="548" text-anchor="end" fill="#e95420" font-family="Ubuntu Mono, monospace" font-size="22" font-weight="700">7</text>
+  <text x="336" y="576" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="12.5">r (4) + w (2) + x (1) = rwx</text>
+
+  <rect x="590" y="520" width="255" height="90" rx="5" fill="#181818" stroke="#383838" />
+  <text x="606" y="546" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="700">Grupo (g)</text>
+  <text x="825" y="548" text-anchor="end" fill="#e95420" font-family="Ubuntu Mono, monospace" font-size="22" font-weight="700">7</text>
+  <text x="606" y="576" fill="#eeeeec" font-family="Ubuntu Mono, monospace" font-size="12.5">r (4) + w (2) + s (1) = rws</text>
+
+  <rect x="860" y="520" width="290" height="90" rx="5" fill="#181818" stroke="#383838" />
+  <text x="876" y="546" fill="#eeeeec" font-family="Ubuntu, sans-serif" font-size="13" font-weight="700">Otros (o) + ACL</text>
+  <text x="1130" y="548" text-anchor="end" fill="#e95420" font-family="Ubuntu Mono, monospace" font-size="22" font-weight="700">5</text>
+  <text x="876" y="576" fill="#fce94f" font-family="Ubuntu Mono, monospace" font-size="12.5">drwxrwsr-x+ (Octal 2775)</text>
+</svg>

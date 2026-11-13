@@ -1,0 +1,930 @@
+/* ==========================================================================
+   PermisosLab — Main Application & Dual-OS Boot Selector Styles (css/main.css)
+   Creado para Un Fantasma en el Sistema (https://www.unfantasmaenelsistema.com/)
+   ========================================================================== */
+
+:root {
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-win: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  --font-ubuntu: 'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Ubuntu Mono', 'JetBrains Mono', Consolas, monospace;
+
+  --lab-bg: #0b0f19;
+  --lab-surface: #111827;
+  --lab-border: #1e293b;
+  --lab-text: #f8fafc;
+  --lab-muted: #94a3b8;
+  --win-accent: #0078d7;
+  --ubuntu-accent: #e95420;
+  --ubuntu-aubergine: #300a24;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-family: var(--font-display);
+  background-color: var(--lab-bg);
+  color: var(--lab-text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   1. TOP NAVIGATION BAR (3-Zone Contract + Non-Distorted Logo Lockup)
+   ========================================================================== */
+.lab-topbar {
+  height: 54px;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0 1.35rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.lab-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.lab-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f8fafc;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.brand-ghost-logo {
+  height: 34px;
+  width: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+.lab-brand-sep {
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.lab-author-link {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #38bdf8;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 150ms ease;
+}
+
+.lab-author-link:hover {
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
+@media (max-width: 1120px) {
+  .lab-brand-sep,
+  .lab-author-link {
+    display: none;
+  }
+}
+
+.lab-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.lab-nav-link {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-bottom: 2px solid transparent;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.lab-nav-link:hover {
+  color: #f8fafc;
+}
+
+.lab-nav-link.active {
+  color: #ffffff;
+  border-bottom-color: #38bdf8;
+}
+
+.lab-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.lab-primary-btn {
+  background: #0284c7;
+  color: #ffffff;
+  border: 1px solid #0369a1;
+  border-radius: 6px;
+  padding: 0.42rem 0.9rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.lab-primary-btn:hover {
+  background: #0369a1;
+}
+
+/* ==========================================================================
+   2. DUAL-OS LOGIN / HYPERVISOR SELECTOR SCREEN
+   ========================================================================== */
+.os-selector-screen {
+  min-height: calc(100vh - 54px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+}
+
+@media (max-width: 960px) {
+  .os-selector-screen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.os-login-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.75rem 3.5rem 5.25rem;
+  transition: filter 180ms ease;
+  overflow: hidden;
+}
+
+/* Windows Server Login Side */
+.os-login-pane.win-pane {
+  background: radial-gradient(circle at 20% 20%, #004e8c 0%, #00274d 52%, #001529 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-win);
+}
+
+/* Ubuntu Server Login Side */
+.os-login-pane.linux-pane {
+  background: radial-gradient(circle at 80% 20%, #5e2750 0%, #300a24 58%, #190513 100%);
+  font-family: var(--font-ubuntu);
+}
+
+.os-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.os-login-card {
+  max-width: 440px;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Windows 10/11 Lock/Login Avatar & Controls */
+.win-login-avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.15rem;
+  backdrop-filter: blur(8px);
+}
+
+.win-login-avatar svg {
+  width: 50px;
+  height: 50px;
+  fill: #ffffff;
+}
+
+.win-login-user {
+  font-size: 1.65rem;
+  font-weight: 300;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.01em;
+}
+
+.win-login-domain {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1.35rem;
+}
+
+.win-login-input-row {
+  display: flex;
+  width: 100%;
+  max-width: 310px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  margin-bottom: 1rem;
+}
+
+.win-login-input-row:focus-within {
+  border-color: #0078d7;
+  background: #ffffff;
+}
+
+.win-login-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0 0.75rem;
+  color: #ffffff;
+  font-family: var(--font-win);
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.win-login-input-row:focus-within .win-login-input {
+  color: #000000;
+}
+
+.win-login-submit {
+  width: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 150ms ease;
+}
+
+.win-login-submit:hover {
+  background: #0078d7;
+}
+
+.win-enter-btn {
+  width: 100%;
+  max-width: 310px;
+  padding: 0.65rem 1.25rem;
+  background: #0078d7;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--font-win);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.win-enter-btn:hover {
+  background: #106ebe;
+}
+
+/* Ubuntu Server GDM / TTY Login Card */
+.ubuntu-login-avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: rgba(233, 84, 32, 0.18);
+  border: 2px solid #e95420;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.15rem;
+}
+
+.ubuntu-login-avatar svg {
+  width: 48px;
+  height: 48px;
+  color: #e95420;
+}
+
+.ubuntu-login-user {
+  font-size: 1.65rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+}
+
+.ubuntu-login-host {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #d3d7cf;
+  margin-bottom: 1.35rem;
+}
+
+.ubuntu-tty-preview {
+  width: 100%;
+  max-width: 340px;
+  background: rgba(12, 12, 12, 0.72);
+  border: 1px solid rgba(233, 84, 32, 0.45);
+  border-radius: 6px;
+  padding: 0.75rem 0.95rem;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #eeeeec;
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+
+.ubuntu-enter-btn {
+  width: 100%;
+  max-width: 340px;
+  padding: 0.65rem 1.25rem;
+  background: #e95420;
+  color: #ffffff;
+  border: 1px solid #c74316;
+  border-radius: 4px;
+  font-family: var(--font-ubuntu);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.ubuntu-enter-btn:hover {
+  background: #d34615;
+}
+
+.os-feature-summary {
+  margin-top: 1.35rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.55;
+  max-width: 360px;
+}
+
+.os-pane-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Author Attribution Dock on Login Screen (Non-distorted Logo + Website Link) */
+.os-author-dock {
+  position: absolute;
+  bottom: 1.15rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.os-author-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+  padding: 0.45rem 1rem 0.45rem 0.65rem;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.os-author-card:hover {
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.os-author-logo {
+  height: 42px;
+  width: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+.os-author-meta {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.os-author-title {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+}
+
+.os-author-url {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   3. WORKSPACE & TWO-ZONE EDUCATIONAL SANDBOX LAYOUT
+   ========================================================================== */
+.os-workspace {
+  min-height: calc(100vh - 54px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 395px;
+}
+
+@media (max-width: 1180px) {
+  .os-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Right-hand Pedagogical & Challenge Control Deck */
+.lab-control-deck {
+  background: #0f172a;
+  border-left: 1px solid #1e293b;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 54px);
+}
+
+.deck-section {
+  padding-bottom: 1.05rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.deck-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.deck-kicker {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.deck-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 0.5rem;
+  text-wrap: balance;
+}
+
+.deck-desc {
+  font-size: 0.83rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.objective-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.objective-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.79rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+  padding: 0.45rem 0.6rem;
+  background: rgba(30, 41, 59, 0.55);
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+}
+
+.objective-item.completed {
+  background: rgba(5, 150, 105, 0.14);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #ecfdf5;
+}
+
+.objective-status-icon {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.deck-btn-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.deck-btn {
+  flex: 1;
+  padding: 0.48rem 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #f8fafc;
+  white-space: nowrap;
+  transition: background-color 150ms ease;
+}
+
+.deck-btn:hover {
+  background: #334155;
+}
+
+.deck-btn.verify {
+  background: #059669;
+  border-color: #047857;
+  color: #ffffff;
+}
+
+.deck-btn.verify:hover {
+  background: #047857;
+}
+
+.feedback-banner {
+  margin-top: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 5px;
+  font-size: 0.79rem;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+
+.feedback-banner.nominal {
+  background: rgba(5, 150, 105, 0.15);
+  border-color: #059669;
+  color: #a7f3d0;
+}
+
+.feedback-banner.elevated {
+  background: rgba(217, 119, 6, 0.15);
+  border-color: #d97706;
+  color: #fde68a;
+}
+
+/* ==========================================================================
+   3B. HELP DESK / WEBMAIL TICKET CLIENT UI
+   ========================================================================== */
+.helpdesk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.helpdesk-brand {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.helpdesk-meta-text {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.helpdesk-inbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.helpdesk-ticket-item {
+  width: 100%;
+  text-align: left;
+  background: #131c2e;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  color: #e2e8f0;
+  font-family: var(--font-display);
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.helpdesk-ticket-item:hover {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.helpdesk-ticket-item.active {
+  background: #172554;
+  border-color: #38bdf8;
+}
+
+.helpdesk-ticket-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-bottom: 0.18rem;
+}
+
+.helpdesk-ticket-subj {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tarjeta de Correo / Mensaje de Incidencia */
+.helpdesk-mail-card {
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.helpdesk-mail-subject {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.helpdesk-mail-sender {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.helpdesk-mail-sender strong {
+  color: #e2e8f0;
+}
+
+.helpdesk-mail-body {
+  font-size: 0.81rem;
+  color: #e2e8f0;
+  line-height: 1.52;
+  background: #0b0f19;
+  border: 1px solid #1e293b;
+  border-radius: 5px;
+  padding: 0.65rem 0.75rem;
+}
+
+.helpdesk-resource-line {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: #7dd3fc;
+  word-break: break-all;
+}
+
+/* Author Footer inside Help Desk Sidebar */
+.deck-author-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.deck-author-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.deck-author-footer a:hover {
+  color: #38bdf8;
+}
+
+.deck-author-logo {
+  height: 26px;
+  width: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   4. SOURCE CODE & GUIDE MODALS
+   ========================================================================== */
+.code-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 250;
+}
+
+.code-modal {
+  width: 100%;
+  max-width: 1060px;
+  height: 82vh;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+}
+
+.code-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.code-file-tabs {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.6rem 1.25rem;
+  background: #0b0f19;
+  border-bottom: 1px solid #1e293b;
+  overflow-x: auto;
+}
+
+.code-file-tab {
+  padding: 0.38rem 0.75rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.code-file-tab.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.code-viewer-pre {
+  flex: 1;
+  margin: 0;
+  padding: 1.25rem;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+  background: #090d16;
+}
+
+/* Guide & Cheat Sheet Modal Content */
+.guide-modal-body {
+  flex: 1;
+  padding: 1.35rem;
+  overflow-y: auto;
+  background: #0b0f19;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.15rem;
+}
+
+@media (max-width: 900px) {
+  .guide-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-card {
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.guide-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.guide-card p {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.guide-card ul {
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.guide-card code {
+  font-family: var(--font-mono);
+  color: #7dd3fc;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+.guide-pre {
+  background: #090d16;
+  border: 1px solid #1e293b;
+  border-radius: 5px;
+  padding: 0.65rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: #a7f3d0;
+  overflow-x: auto;
+  line-height: 1.45;
+}
+
+/* Windows Live Access Tester inside Explorer */
+.win-access-tester {
+  margin-top: 10px;
+  padding: 8px;
+  background: #f5f6f7;
+  border: 1px solid #d9d9d9;
+  font-size: 11.5px;
+  color: #111111;
+}

@@ -1,0 +1,456 @@
+/* ==========================================================================
+   PermisosLab — Pixel-Perfect Ubuntu Bash Terminal Styles (css/linux.css)
+   ========================================================================== */
+
+.linux-desktop-stage {
+  background: radial-gradient(circle at 15% 85%, #4c153b 0%, #24071b 55%, #12040e 100%);
+  min-height: calc(100vh - 52px);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  gap: 16px;
+  font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #eeeeec;
+}
+
+/* Ubuntu Yaru Top Panel */
+.ubuntu-top-panel {
+  height: 28px;
+  background-color: #1d1d1d;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 12.5px;
+  color: #eeeeec;
+  user-select: none;
+}
+
+.ubuntu-panel-left,
+.ubuntu-panel-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ubuntu-panel-clock {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   1. GNOME TERMINAL WINDOW CHROME (Yaru Dark Theme)
+   ========================================================================== */
+.ubuntu-terminal-window {
+  background-color: #300a24;
+  border: 1px solid #1b1b1b;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ubuntu-headerbar {
+  height: 38px;
+  background: linear-gradient(180deg, #353535 0%, #2c2c2c 100%);
+  border-bottom: 1px solid #1b1b1b;
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  align-items: center;
+  padding: 0 10px;
+  user-select: none;
+}
+
+.ubuntu-headerbar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ubuntu-tab-new-btn {
+  background: #3d3d3d;
+  border: 1px solid #222222;
+  color: #eeeeec;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ubuntu-tab-new-btn:hover {
+  background: #4a4a4a;
+}
+
+.ubuntu-headerbar-title {
+  text-align: center;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #eeeeec;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ubuntu-window-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ubuntu-win-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #3d3d3d;
+  border: 1px solid #252525;
+  color: #dcdcdc;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ubuntu-win-circle:hover {
+  background-color: #4f4f4f;
+}
+
+.ubuntu-win-circle.close {
+  background-color: #e95420;
+  border-color: #c74316;
+  color: #ffffff;
+}
+
+.ubuntu-win-circle.close:hover {
+  background-color: #f26430;
+}
+
+/* GNOME Terminal Menubar */
+.ubuntu-menubar {
+  height: 28px;
+  background-color: #262626;
+  border-bottom: 1px solid #1b1b1b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 12px;
+  color: #d3d7cf;
+  user-select: none;
+}
+
+.ubuntu-menu-items {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ubuntu-menu-item {
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.ubuntu-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.ubuntu-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ubuntu-mini-btn {
+  background: #363636;
+  border: 1px solid #484848;
+  color: #eeeeec;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 11.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ubuntu-mini-btn:hover {
+  background: #484848;
+  border-color: #e95420;
+}
+
+/* ==========================================================================
+   2. BASH TERMINAL VIEWPORT & SYNTAX HIGHLIGHTING (GNU coreutils LS_COLORS)
+   ========================================================================== */
+.ubuntu-term-body {
+  background-color: #300a24;
+  color: #eeeeec;
+  font-family: 'Ubuntu Mono', 'JetBrains Mono', Consolas, monospace;
+  font-size: 14.5px;
+  line-height: 1.48;
+  padding: 12px 14px;
+  height: 365px;
+  overflow-y: auto;
+  cursor: text;
+  transition: background-color 150ms ease;
+}
+
+.ubuntu-term-body.theme-black {
+  background-color: #0c0c0c;
+}
+
+.term-output-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 2px;
+}
+
+/* Standard Bash Prompt Colors */
+.term-prompt-user {
+  color: #8ae234;
+  font-weight: 700;
+}
+
+.term-prompt-user.root-user {
+  color: #ef2929;
+  font-weight: 700;
+}
+
+.term-prompt-sep {
+  color: #eeeeec;
+}
+
+.term-prompt-path {
+  color: #729fcf;
+  font-weight: 700;
+}
+
+/* GNU coreutils ls --color=auto Syntax Classes */
+.ls-dir {
+  color: #729fcf;
+  font-weight: 700;
+}
+
+.ls-exec {
+  color: #8ae234;
+  font-weight: 700;
+}
+
+.ls-symlink {
+  color: #34e2e2;
+  font-weight: 700;
+}
+
+.ls-archive {
+  color: #ef2929;
+  font-weight: 700;
+}
+
+.ls-suid {
+  background-color: #ef2929;
+  color: #eeeeec;
+  padding: 0 2px;
+}
+
+.ls-sgid {
+  background-color: #fce94f;
+  color: #000000;
+  padding: 0 2px;
+}
+
+.ls-sticky {
+  background-color: #8ae234;
+  color: #000000;
+  padding: 0 2px;
+}
+
+.ls-sticky-only {
+  background-color: #3465a4;
+  color: #eeeeec;
+  padding: 0 2px;
+}
+
+.ls-file {
+  color: #eeeeec;
+}
+
+.term-muted {
+  color: #AD7FA8;
+}
+
+.term-error {
+  color: #ff6b6b;
+}
+
+.term-success {
+  color: #8ae234;
+}
+
+.term-info {
+  color: #fce94f;
+}
+
+/* Active Command Input Line */
+.term-input-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-top: 2px;
+}
+
+.term-prompt-wrap {
+  white-space: pre;
+  flex-shrink: 0;
+}
+
+.term-cmd-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #eeeeec;
+  font-family: 'Ubuntu Mono', 'JetBrains Mono', Consolas, monospace;
+  font-size: 14.5px;
+  line-height: 1.48;
+  caret-color: #eeeeec;
+  min-width: 120px;
+}
+
+/* ==========================================================================
+   3. INTERACTIVE POSIX BIT-MATRIX & OCTAL INSPECTOR PANEL
+   ========================================================================== */
+.linux-inspector-panel {
+  background-color: #1d1d1d;
+  border: 1px solid #353535;
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .linux-inspector-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+.linux-file-selector-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-right: 1px solid #333333;
+  padding-right: 14px;
+}
+
+@media (max-width: 960px) {
+  .linux-file-selector-box {
+    border-right: none;
+    border-bottom: 1px solid #333333;
+    padding-right: 0;
+    padding-bottom: 12px;
+  }
+}
+
+.linux-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: #262626;
+  border: 1px solid #383838;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 12.5px;
+}
+
+.linux-file-item:hover {
+  border-color: #729fcf;
+}
+
+.linux-file-item.selected {
+  background: rgba(233, 84, 32, 0.18);
+  border-color: #e95420;
+}
+
+.posix-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .posix-matrix-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.posix-octet-card {
+  background: #252525;
+  border: 1px solid #383838;
+  border-radius: 5px;
+  padding: 8px 10px;
+}
+
+.posix-octet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #babdb6;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #333333;
+}
+
+.posix-octet-digit {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e95420;
+}
+
+.posix-bit-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.posix-bit-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: #eeeeec;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.posix-bit-label:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.posix-summary-bar {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
