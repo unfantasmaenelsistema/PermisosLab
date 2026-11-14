@@ -84,7 +84,7 @@ export const TICKETS_JSON = {
       message:
         'Buenos días. Estoy en el grupo Finanzas_Group que tiene permiso de Modificar sobre C:\\Empresa\\Finanzas, pero aun así Windows me bloquea al intentar crear o guardar cualquier archivo. Alguien tocó los permisos del grupo Users ayer.',
       hint:
-        'Juan pertenece tanto a "Finanzas_Group" como a "Users". En la pestaña Seguridad de Finanzas, selecciona el grupo "Users": verás que tiene una casilla "Denegar" marcada en Escritura. Como Denegar prevalece sobre Permitir, desmarca Denegar en "Users" o quita a "Users" de la carpeta Finanzas.',
+        'Juan pertenece tanto a "Finanzas_Group" como a "Users". En la pestaña Seguridad de Finanzas, selecciona el grupo "Users": verás que tiene una casilla "Denegar" marcada en Escritura. Como Denegar prevalece sobre Permitir (y anula también "Modificar", que incluye escribir), desmarca Denegar en "Users" o quita a "Users" de la carpeta Finanzas. Pulsa Aplicar.',
       successReply:
         '¡Solucionado! Era esa denegación en el grupo Users la que me pisaba los permisos de Finanzas_Group. Ya puedo crear archivos sin problema.',
       initialState: {
@@ -122,7 +122,7 @@ export const TICKETS_JSON = {
       message:
         '¡Alerta de confidencialidad! Hemos detectado que cualquier usuario del dominio (como Juan de Finanzas o María de Ventas) puede abrir y leer Nominas_2026.xlsx porque está heredando permisos de "Users". Cortad la herencia, quitad a "Users" y dad permiso de Modificar únicamente a "RRHH_Group".',
       hint:
-        'En Nominas_2026.xlsx, pulsa "Opciones avanzadas" → pestaña "Permisos" → "Deshabilitar herencia (Convertir en explícitos)" → Aceptar. Luego en "Seguridad" selecciona "Users" y pulsa "Quitar", y agrega a "RRHH_Group" con permiso "Modificar".',
+        'En Nominas_2026.xlsx, pulsa "Opciones avanzadas" → pestaña "Permisos" → "Deshabilitar herencia (Convertir en explícitos)" → Aceptar. Luego en "Seguridad" selecciona "Users" y pulsa "Quitar", y agrega a "RRHH_Group" con permiso "Modificar". Pulsa Aplicar.',
       successReply:
         'Verificado desde Auditoría: los usuarios fuera de RRHH_Group reciben Acceso Denegado y el equipo de RRHH puede editar el fichero.',
       initialState: {
@@ -217,7 +217,7 @@ export const TICKETS_JSON = {
       message:
         'Hemos creado la carpeta C:\\Empresa\\Proyectos_2026 en el servidor, pero ni María (Ventas_Group) ni Juan (Finanzas_Group) pueden entrar por red ni guardar documentos. Necesitamos compartirla en red con permiso SMB "Cambiar" y dar permiso NTFS "Modificar" tanto a Ventas_Group como a Finanzas_Group.',
       hint:
-        '1) En Proyectos_2026 abre la pestaña "Compartir", marca "Compartir esta carpeta" y selecciona "Cambiar". 2) En la pestaña "Seguridad", agrega a "Ventas_Group" y marca "Modificar", y luego agrega a "Finanzas_Group" y marca "Modificar".',
+        '1) En Proyectos_2026 abre la pestaña "Compartir", marca "Compartir esta carpeta" y selecciona "Cambiar". 2) En la pestaña "Seguridad", agrega a "Ventas_Group" y marca "Modificar", y luego agrega a "Finanzas_Group" y marca "Modificar". Pulsa Aplicar.',
       successReply:
         '¡Genial! Tanto el departamento de Ventas como el de Finanzas ya ven \\\\WIN-SRV01\\Proyectos y pueden subir documentación colaborativa.',
       initialState: {
@@ -546,7 +546,7 @@ export const TICKETS_JSON = {
       message:
         'Hola. Necesitamos que cualquier operador pueda ejecutar el binario de diagnóstico /var/www/bin_healthcheck sin sudo, pero el binario debe correr con privilegios efectivos de root (EUID=root) para comprobar puertos privilegiados. Ahora mismo tiene modo 0755 y pertenece a alumno. Asígnalo a root:root y activa el bit SUID (4755).',
       hint:
-        'Ejecuta: sudo chown root:root /var/www/bin_healthcheck && sudo chmod 4755 /var/www/bin_healthcheck (y pruébalo ejecutando: ./bin_healthcheck).',
+        'Ejecuta: sudo chown root:root /var/www/bin_healthcheck && sudo chmod 4755 /var/www/bin_healthcheck (y pruébalo ejecutando: ./bin_healthcheck). El orden importa: chown borra el bit SUID, como hace el kernel, así que el chmod va después.',
       successReply:
         '¡Comprobado! Al lanzar ./bin_healthcheck ahora se ejecuta con [EUID=root] gracias al bit SUID (-rwsr-xr-x).',
       initialState: {

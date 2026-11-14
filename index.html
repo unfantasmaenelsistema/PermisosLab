@@ -274,7 +274,7 @@
               <!-- Botonera inferior estándar de Windows -->
               <div class="win-dialog-footer">
                 <button type="button" id="win-btn-ok" class="win-btn win-btn-default">Aceptar</button>
-                <button type="button" id="win-btn-cancel" class="win-btn">Cancelar / Reiniciar</button>
+                <button type="button" id="win-btn-cancel" class="win-btn" title="Descarta los cambios que aún no has aplicado">Cancelar</button>
                 <button type="button" id="win-btn-apply" class="win-btn" disabled>Aplicar</button>
               </div>
             </div>
@@ -379,15 +379,15 @@
             <div class="ubuntu-menubar">
               <div class="ubuntu-menu-items">
                 <span class="ubuntu-menu-item" data-linux-cmd="ls -l">Archivo</span>
-                <span class="ubuntu-menu-item" data-linux-cmd="getfacl html">ACL (getfacl)</span>
+                <span class="ubuntu-menu-item" data-linux-cmd="getfacl {sel}" title="getfacl del elemento seleccionado en el inspector">ACL (getfacl)</span>
                 <span class="ubuntu-menu-item" data-linux-cmd="id">Identidad</span>
                 <span class="ubuntu-menu-item" data-linux-cmd="help">Ayuda</span>
               </div>
               <div class="ubuntu-toolbar-actions">
                 <button type="button" class="ubuntu-mini-btn" data-linux-cmd="ls -l">ls -l</button>
-                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="getfacl html">getfacl html</button>
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="getfacl {sel}" title="getfacl del elemento seleccionado en el inspector">getfacl selección</button>
                 <button type="button" class="ubuntu-mini-btn" data-linux-cmd="su - jdoe">su - jdoe</button>
-                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="touch html/test.txt">touch html/test.txt</button>
+                <button type="button" class="ubuntu-mini-btn" data-linux-cmd="touch {dir}/test.txt" title="Crea test.txt en el directorio seleccionado para probar la escritura">touch test.txt</button>
                 <button type="button" class="ubuntu-mini-btn" data-linux-cmd="su - alumno">su - alumno</button>
                 <button type="button" id="btn-toggle-ubuntu-theme" class="ubuntu-mini-btn">
                   Fondo #300a24 / #0c0c0c
@@ -491,7 +491,7 @@
 icacls "C:\Empresa\RRHH\Nominas_2026.xlsx"
 
 # Deshabilitar herencia convirtiendo en explícitos y dar Modificar a RRHH:
-icacls "C:\Empresa\RRHH\Nominas_2026.xlsx" /inheritance:d /grant "EMPRESA\RRHH_Group":(M) /remove:g "WIN-SRV01\Users"</pre>
+icacls "C:\Empresa\RRHH\Nominas_2026.xlsx" /inheritance:d /grant "EMPRESA\RRHH_Group:(M)" /remove:g "WIN-SRV01\Users"</pre>
             </div>
 
             <div class="guide-card">
@@ -528,7 +528,7 @@ sudo chmod 1777 /var/www/compartido</pre>
                   <strong>La Máscara ACL (<code>mask::</code>):</strong> Define el <strong>permiso máximo efectivo</strong> para todos los usuarios nombrados (<code>user:nombre:</code>), grupos nombrados (<code>group:nombre:</code>) y el grupo propietario (<code>group::</code>).
                 </li>
                 <li>
-                  <strong>Atención con <code>chmod</code> sobre archivos con ACL:</strong> Ejecutar <code>chmod</code> después de <code>setfacl</code> modifica <code>mask::</code>, pudiendo dejar entradas con <code>#effective:r-x</code> aunque tengan <code>rwx</code> asignado.
+                  <strong>Atención con <code>chmod</code> sobre archivos con ACL:</strong> con ACL extendida, los bits de grupo que ves en <code>ls -l</code> son la máscara. Ejecutar <code>chmod</code> después de <code>setfacl</code> modifica <code>mask::</code> (no <code>group::</code>), pudiendo dejar entradas con <code>#effective:r-x</code> aunque tengan <code>rwx</code> asignado.
                 </li>
               </ul>
               <pre class="guide-pre"># Inspeccionar ACL y permisos efectivos:
