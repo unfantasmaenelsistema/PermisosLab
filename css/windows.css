@@ -27,7 +27,8 @@
 
 @media (max-width: 960px) {
   .win-desktop-workspace {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px 10px 56px;
   }
 }
 

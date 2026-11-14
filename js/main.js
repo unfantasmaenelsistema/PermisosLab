@@ -7,6 +7,16 @@ import { CHALLENGES, verifyTicket } from './challenges.js';
 import { WindowsPermissionsEngine, WIN_PRINCIPALS, NTFS_PERMS } from './windowsEngine.js';
 import { LinuxTerminalEngine, LINUX_USERS, LINUX_GROUPS } from './linuxEngine.js';
 
+const PROGRESS_KEY = 'permisoslab_progress_v1';
+
+/** Escapa texto antes de insertarlo como HTML */
+const escapeHtml = (str) =>
+  String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
 class PermisosLabApp {
   constructor() {
     this.activeEnv = 'selector'; // 'selector' | 'windows' | 'linux'
@@ -18,7 +28,7 @@ class PermisosLabApp {
       windows: null,
       linux: null,
     };
-    this.resolvedTickets = new Set();
+    this.resolvedTickets = this.loadProgress();
     this.lastVerification = null;
     this.showHint = false;
 
@@ -107,18 +117,56 @@ class PermisosLabApp {
     // Quick Linux Toolbar buttons
     document.querySelectorAll('[data-linux-cmd]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const cmd = btn.getAttribute('data-linux-cmd');
-        if (cmd) {
-          this.linuxEngine.executeCommand(cmd, true);
+        const template = btn.getAttribute('data-linux-cmd');
+        if (template) {
+          // {sel} = elemento seleccionado en el inspector; {dir} = su directorio (para crear archivos de prueba)
+          const eng = this.linuxEngine;
+          const selNode = eng.fs[eng.selectedInspectPath];
+          const sel = selNode ? selNode.path : eng.cwd;
+          const dir = selNode && selNode.type === 'dir' ? selNode.path : eng.getParentPath(sel);
+          const cmd = template.replace('{sel}', sel).replace('{dir}', dir);
+          eng.executeCommand(cmd, true);
           termInput?.focus();
         }
       });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const guide = document.getElementById('guide-modal-backdrop');
+      const code = document.getElementById('code-modal-backdrop');
+      if (code && !code.classList.contains('hidden')) {
+        this.closeSourceModal();
+      } else if (guide && !guide.classList.contains('hidden')) {
+        guide.classList.add('hidden');
+      } else if (this.activeEnv === 'windows' && this.winEngine.state.isAdvancedModalOpen) {
+        this.winEngine.cancelAdvancedModal();
+      }
     });
 
     document.getElementById('btn-toggle-ubuntu-theme')?.addEventListener('click', () => {
       const next = this.linuxEngine.theme === 'aubergine' ? 'black' : 'aubergine';
       this.linuxEngine.setTheme(next);
     });
+  }
+
+  /** Tickets cerrados con «Verificar Ticket» (se guardan en el navegador) */
+  loadProgress() {
+    try {
+      const data = JSON.parse(window.localStorage.getItem(PROGRESS_KEY) || '{}');
+      const valid = new Set([...CHALLENGES.windows, ...CHALLENGES.linux].map((t) => t.id));
+      return new Set((data.resolved || []).filter((id) => valid.has(id)));
+    } catch {
+      return new Set();
+    }
+  }
+
+  saveProgress() {
+    try {
+      window.localStorage.setItem(PROGRESS_KEY, JSON.stringify({ v: 1, resolved: [...this.resolvedTickets] }));
+    } catch {
+      /* almacenamiento no disponible: el progreso dura solo esta sesión */
+    }
   }
 
   autocompleteLinuxInput(inputEl) {
@@ -336,7 +384,8 @@ class PermisosLabApp {
     }
     const cancelBtn = document.getElementById('win-btn-cancel');
     if (cancelBtn) {
-      cancelBtn.onclick = () => this.winEngine.reset();
+      cancelBtn.disabled = !state.dirty;
+      cancelBtn.onclick = () => this.winEngine.cancelChanges();
     }
 
     // 4. Render Stacked Secondary Modal ("Configuración de seguridad avanzada")
@@ -672,8 +721,8 @@ class PermisosLabApp {
       }
     }
 
-    document.getElementById('win-adv-close-x').onclick = () => this.winEngine.closeAdvancedModal();
-    document.getElementById('win-adv-btn-cancel').onclick = () => this.winEngine.closeAdvancedModal();
+    document.getElementById('win-adv-close-x').onclick = () => this.winEngine.cancelAdvancedModal();
+    document.getElementById('win-adv-btn-cancel').onclick = () => this.winEngine.cancelAdvancedModal();
     document.getElementById('win-adv-btn-ok').onclick = () => {
       this.winEngine.applyChanges();
       this.winEngine.closeAdvancedModal();
@@ -905,8 +954,8 @@ class PermisosLabApp {
         const hasAcl = eng.hasExtendedAcl(node);
         const cls = eng.getLsColorClass(node);
         return `
-          <div class="linux-file-item ${isSel ? 'selected' : ''}" data-lin-file="${node.path}">
-            <span class="${cls}">${node.name}</span>
+          <div class="linux-file-item ${isSel ? 'selected' : ''}" data-lin-file="${escapeHtml(node.path)}" title="${escapeHtml(node.path)}">
+            <span class="${cls}">${escapeHtml(node.path.replace('/var/www/', ''))}</span>
             <span style="color:#babdb6;font-size:11.5px;">${oct}${hasAcl ? '+' : ''}</span>
           </div>
         `;
@@ -1005,7 +1054,7 @@ class PermisosLabApp {
     const rwxStr = (b) => `${b & 4 ? 'r' : '-'}${b & 2 ? 'w' : '-'}${b & 1 ? 'x' : '-'}`;
     let aclSummaryHtml = '<span style="color:#babdb6;">Sin ACL extendida (UGO estándar)</span>';
     if (hasAcl) {
-      const aclChips = [];
+      const aclChips = [`group::${rwxStr(eng.getOwningGroupBits(activeNode))}`];
       Object.entries(activeNode.acl?.users || {}).forEach(([u, b]) => {
         const eff = b & maskVal;
         aclChips.push(`u:${u}:${rwxStr(b)}${eff !== b ? ` (#effective:${rwxStr(eff)})` : ''}`);
@@ -1015,7 +1064,7 @@ class PermisosLabApp {
         aclChips.push(`g:${g}:${rwxStr(b)}${eff !== b ? ` (#effective:${rwxStr(eff)})` : ''}`);
       });
       aclChips.push(`mask::${rwxStr(maskVal)}`);
-      aclSummaryHtml = `<span style="color:#fce94f;">ACL (+): ${aclChips.join(' · ')}</span>`;
+      aclSummaryHtml = `<span style="color:#fce94f;">ACL (+): ${escapeHtml(aclChips.join(' · '))} <em style="color:#babdb6;">(con ACL, la columna Grupo de la matriz es la máscara)</em></span>`;
     }
 
     matrixContainer.innerHTML = `
@@ -1043,18 +1092,31 @@ class PermisosLabApp {
       </div>
     `;
 
+    // La matriz no salta los permisos: escribe en la terminal el comando equivalente y lo ejecuta
+    // como el usuario activo (con sudo si es un administrador y el archivo no es suyo).
+    const runAsCurrentUser = (cmd, needsRoot) => {
+      const user = LINUX_USERS[eng.currentUser];
+      const useSudo = needsRoot && eng.currentUser !== 'root' && user?.groups.includes('sudo');
+      eng.executeCommand(`${useSudo ? 'sudo ' : ''}${cmd}`, true);
+    };
+
     matrixContainer.querySelectorAll('[data-posix-mask]').forEach((chk) => {
       chk.addEventListener('change', () => {
         const bitMask = Number(chk.getAttribute('data-posix-mask'));
         const nextMode = chk.checked ? activeNode.mode | bitMask : activeNode.mode & ~bitMask;
-        eng.setModeFromMatrix(activeNode.path, nextMode);
+        // 5 dígitos para que el octal fije exactamente los bits especiales también en directorios
+        const oct = `0${nextMode.toString(8).padStart(4, '0')}`;
+        runAsCurrentUser(`chmod ${oct} ${activeNode.path}`, eng.currentUser !== activeNode.owner);
       });
     });
 
     const ownerSel = matrixContainer.querySelector('#posix-owner-sel');
     const groupSel = matrixContainer.querySelector('#posix-group-sel');
     const updateOwnerGroup = () => {
-      eng.setOwnerFromMatrix(activeNode.path, ownerSel.value, groupSel.value);
+      const ownerChanges = ownerSel.value !== activeNode.owner;
+      const userGroups = LINUX_USERS[eng.currentUser]?.groups || [];
+      const needsRoot = ownerChanges || eng.currentUser !== activeNode.owner || !userGroups.includes(groupSel.value);
+      runAsCurrentUser(`chown ${ownerSel.value}:${groupSel.value} ${activeNode.path}`, needsRoot);
     };
     ownerSel?.addEventListener('change', updateOwnerGroup);
     groupSel?.addEventListener('change', updateOwnerGroup);
@@ -1074,9 +1136,6 @@ class PermisosLabApp {
 
     const engineInstance = this.activeEnv === 'windows' ? this.winEngine : this.linuxEngine;
     const liveEval = verifyTicket(ticket, engineInstance);
-    if (liveEval.resolved) {
-      this.resolvedTickets.add(ticket.id);
-    }
 
     const inboxHtml = list
       .map((item, idx) => {
@@ -1114,6 +1173,7 @@ class PermisosLabApp {
           <span class="helpdesk-brand">Help Desk · Bandeja de Tickets</span>
           <span class="helpdesk-meta-text tabular-nums">
             ${this.resolvedTickets.size} / ${totalTicketsCount} resueltos
+            ${this.resolvedTickets.size ? '<button type="button" id="btn-reset-progress" class="helpdesk-reset-link" title="Borra el progreso guardado en este navegador">Reiniciar</button>' : ''}
           </span>
         </div>
 
@@ -1199,7 +1259,9 @@ class PermisosLabApp {
               : `
                 <div class="feedback-banner ${liveEval.resolved ? 'nominal' : 'elevated'}" style="margin-top:0.25rem;">
                   ${
-                    liveEval.resolved
+                    liveEval.resolved && this.activeEnv === 'windows' && this.winEngine.state.dirty
+                      ? '● Corrección lista pero sin aplicar: pulsa «Aplicar» o «Aceptar» en Propiedades y después «Verificar Ticket».'
+                      : liveEval.resolved
                       ? `● Estado listo: pulsa "Verificar Ticket" para confirmar con ${ticket.senderName} y cerrar la incidencia.`
                       : `○ Estado abierto: aplica la corrección en ${
                           this.activeEnv === 'windows' ? 'Propiedades de Windows' : 'la Terminal Bash'
@@ -1234,15 +1296,33 @@ class PermisosLabApp {
     });
 
     deckEl.querySelector('#btn-verify-ticket')?.addEventListener('click', () => {
+      // En Windows, los cambios no cuentan hasta pulsar Aplicar o Aceptar (como en el diálogo real)
+      if (this.activeEnv === 'windows' && this.winEngine.state.dirty) {
+        this.lastVerification = {
+          ticketId: ticket.id,
+          resolved: false,
+          replyMessage: 'Tienes cambios sin aplicar en las Propiedades. Pulsa «Aplicar» o «Aceptar» y vuelve a verificar.',
+        };
+        this.renderControlDeck();
+        return;
+      }
       const checkResult = verifyTicket(ticket, engineInstance);
       if (checkResult.resolved) {
         this.resolvedTickets.add(ticket.id);
+        this.saveProgress();
       }
       this.lastVerification = {
         ticketId: ticket.id,
         resolved: checkResult.resolved,
         replyMessage: checkResult.replyMessage,
       };
+      this.renderControlDeck();
+    });
+
+    deckEl.querySelector('#btn-reset-progress')?.addEventListener('click', () => {
+      this.resolvedTickets.clear();
+      this.saveProgress();
+      this.lastVerification = null;
       this.renderControlDeck();
     });
 
@@ -1295,8 +1375,8 @@ class PermisosLabApp {
     pre.textContent = `Cargando /${filePath}...`;
     try {
       const resp = await fetch(`./${filePath}`);
-      const text = await resp.text();
-      pre.textContent = text;
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      pre.textContent = await resp.text();
     } catch {
       pre.textContent = `No se pudo cargar ./${filePath}`;
     }

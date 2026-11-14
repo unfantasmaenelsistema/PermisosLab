@@ -1,6 +1,0 @@
-{
-  "name": "PermisosLab — Simulador Nativo de Permisos Windows & Linux",
-  "description": "Laboratorio interactivo pixel-perfect de administración de permisos NTFS/SMB en Windows Server y permisos POSIX/Octal en terminal bash de Ubuntu Server.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

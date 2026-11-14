@@ -33,14 +33,52 @@ export const SHARE_PERMS = [
 ];
 
 /**
- * Maps a Share permission level ('read' | 'change' | 'full') to the NTFS capabilities it permits
+ * Derechos atómicos en los que se descomponen los permisos básicos de NTFS y de Share.
+ * Un permiso compuesto (Modificar, Control total…) solo es efectivo si lo son TODOS sus derechos,
+ * y denegar uno de ellos (p. ej. Escritura) anula también los compuestos que lo contienen.
  */
-export const SHARE_TO_NTFS_CAPABILITIES = {
-  none: [],
-  read: ['read_exec', 'read'],
-  change: ['modify', 'read_exec', 'read', 'write'],
-  full: ['full', 'modify', 'read_exec', 'read', 'write'],
+export const ATOMIC_RIGHTS = ['R', 'X', 'W', 'D', 'C'];
+export const ATOMIC_LABELS = {
+  R: 'leer datos',
+  X: 'ejecutar / recorrer',
+  W: 'escribir datos',
+  D: 'eliminar',
+  C: 'cambiar permisos y tomar posesión',
 };
+export const NTFS_ATOMS = {
+  read: ['R'],
+  write: ['W'],
+  read_exec: ['R', 'X'],
+  modify: ['R', 'X', 'W', 'D'],
+  full: ['R', 'X', 'W', 'D', 'C'],
+};
+export const SHARE_ATOMS = {
+  read: ['R', 'X'],
+  change: ['R', 'X', 'W', 'D'],
+  full: ['R', 'X', 'W', 'D', 'C'],
+};
+/** Casillas que se marcan junto a cada permiso (como en el diálogo de Windows) */
+const NTFS_COMPONENTS = {
+  full: ['full', 'modify', 'read_exec', 'read', 'write'],
+  modify: ['modify', 'read_exec', 'read', 'write'],
+  read_exec: ['read_exec', 'read'],
+  read: ['read'],
+  write: ['write'],
+};
+const SHARE_COMPONENTS = {
+  full: ['full', 'change', 'read'],
+  change: ['change', 'read'],
+  read: ['read'],
+};
+
+/** ACL de la carpeta contenedora que se hereda al (re)habilitar la herencia */
+export const DEFAULT_PARENT_ACL = [
+  { principalId: 'system', allow: ['full', 'modify', 'read_exec', 'read', 'write'], deny: [] },
+  { principalId: 'admins', allow: ['full', 'modify', 'read_exec', 'read', 'write'], deny: [] },
+  { principalId: 'users', allow: ['read_exec', 'read'], deny: [] },
+];
+
+const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
 export function createInitialResources() {
   return [
@@ -178,6 +216,7 @@ export class WindowsPermissionsEngine {
       lastSimulatedAction: null,
       statusMessage: 'Estado inicial del ticket cargado. Investiga las pestañas Compartir y Seguridad.',
     };
+    this.savedResources = clone(this.state.resources);
     this.notify();
   }
 
@@ -207,6 +246,7 @@ export class WindowsPermissionsEngine {
       lastSimulatedAction: null,
       statusMessage: `Ticket cargado: inspeccionando ${targetRes?.path || ''}`,
     };
+    this.savedResources = clone(this.state.resources);
     this.notify();
   }
 
@@ -220,7 +260,6 @@ export class WindowsPermissionsEngine {
     this.state.selectedResourceId = resourceId;
     this.state.selectedPrincipalId = res.acl[0]?.principalId || 'system';
     this.state.selectedSharePrincipalId = res.shareAcl[0]?.principalId || 'auth_users';
-    this.state.dirty = false;
     this.state.lastSimulatedAction = null;
     this.state.statusMessage = `Propiedades cargadas para ${res.path}`;
     this.notify();
@@ -271,6 +310,8 @@ export class WindowsPermissionsEngine {
   }
 
   openAdvancedModal(initialTab = 'adv_permissions') {
+    // Cancelar en el diálogo avanzado descarta solo lo que se cambie dentro de él
+    this.advSnapshot = { resources: clone(this.state.resources), dirty: this.state.dirty };
     this.state.isAdvancedModalOpen = true;
     this.state.advancedActiveTab = initialTab;
     this.notify();
@@ -279,6 +320,39 @@ export class WindowsPermissionsEngine {
   closeAdvancedModal() {
     this.state.isAdvancedModalOpen = false;
     this.notify();
+  }
+
+  cancelAdvancedModal() {
+    if (this.advSnapshot) {
+      this.state.resources = clone(this.advSnapshot.resources);
+      this.state.dirty = this.advSnapshot.dirty;
+      this.fixSelections();
+      this.state.statusMessage = 'Cambios de la configuración avanzada descartados.';
+    }
+    this.state.isAdvancedModalOpen = false;
+    this.notify();
+  }
+
+  /** Descarta lo que no se haya aplicado (botón Cancelar del diálogo Propiedades) */
+  cancelChanges() {
+    this.state.resources = clone(this.savedResources);
+    this.state.dirty = false;
+    this.state.isAdvancedModalOpen = false;
+    this.state.lastSimulatedAction = null;
+    this.fixSelections();
+    this.state.statusMessage = 'Cambios sin aplicar descartados.';
+    this.notify();
+  }
+
+  fixSelections() {
+    const res = this.getSelectedResource();
+    if (!res) return;
+    if (!res.acl.some((e) => e.principalId === this.state.selectedPrincipalId)) {
+      this.state.selectedPrincipalId = res.acl[0]?.principalId || '';
+    }
+    if (!res.shareAcl.some((e) => e.principalId === this.state.selectedSharePrincipalId)) {
+      this.state.selectedSharePrincipalId = res.shareAcl[0]?.principalId || 'auth_users';
+    }
   }
 
   setAdvancedTab(advTabId) {
@@ -341,68 +415,36 @@ export class WindowsPermissionsEngine {
     if (!res) return;
     const entry = res.acl.find((e) => e.principalId === this.state.selectedPrincipalId);
     if (!entry || entry.inherited) return;
-
-    const targetList = mode === 'allow' ? entry.allow : entry.deny;
-    const oppositeList = mode === 'allow' ? entry.deny : entry.allow;
-
-    const addPerm = (list, p) => {
-      if (!list.includes(p)) list.push(p);
-    };
-    const removePerm = (list, p) => {
-      const idx = list.indexOf(p);
-      if (idx !== -1) list.splice(idx, 1);
-    };
-
-    if (checked) {
-      addPerm(targetList, permId);
-      removePerm(oppositeList, permId);
-
-      if (mode === 'allow') {
-        if (permId === 'full') {
-          ['modify', 'read_exec', 'read', 'write'].forEach((p) => {
-            addPerm(targetList, p);
-            removePerm(oppositeList, p);
-          });
-        } else if (permId === 'modify') {
-          ['read_exec', 'read', 'write'].forEach((p) => {
-            addPerm(targetList, p);
-            removePerm(oppositeList, p);
-          });
-        } else if (permId === 'read_exec') {
-          addPerm(targetList, 'read');
-          removePerm(oppositeList, 'read');
-        }
-      } else {
-        if (permId === 'full') {
-          ['modify', 'read_exec', 'read', 'write'].forEach((p) => {
-            addPerm(targetList, p);
-            removePerm(oppositeList, p);
-          });
-        } else if (permId === 'modify') {
-          addPerm(targetList, 'write');
-          removePerm(oppositeList, 'write');
-          removePerm(oppositeList, 'full');
-        } else if (permId === 'read') {
-          addPerm(targetList, 'read_exec');
-          addPerm(targetList, 'modify');
-          addPerm(targetList, 'full');
-        } else if (permId === 'write') {
-          removePerm(oppositeList, 'modify');
-          removePerm(oppositeList, 'full');
-        }
-      }
-    } else {
-      removePerm(targetList, permId);
-      if (mode === 'allow') {
-        if (permId !== 'full') removePerm(targetList, 'full');
-        if (['read', 'write', 'read_exec'].includes(permId)) removePerm(targetList, 'modify');
-        if (permId === 'read') removePerm(targetList, 'read_exec');
-      }
-    }
-
+    this.applyCheckbox(entry, permId, mode, checked, NTFS_COMPONENTS);
     this.state.dirty = true;
     this.state.statusMessage = 'Permisos NTFS modificados. Pulsa "Aplicar" para guardar.';
     this.notify();
+  }
+
+  /**
+   * Marcar una casilla marca sus componentes (Modificar ⇒ Lectura y ejecución, Lectura, Escritura) y
+   * desmarca la columna contraria; desmarcarla desmarca también los compuestos que la contienen.
+   */
+  applyCheckbox(entry, permId, mode, checked, components) {
+    const target = mode === 'allow' ? entry.allow : entry.deny;
+    const opposite = mode === 'allow' ? entry.deny : entry.allow;
+    const add = (list, p) => {
+      if (!list.includes(p)) list.push(p);
+    };
+    const remove = (list, p) => {
+      const idx = list.indexOf(p);
+      if (idx !== -1) list.splice(idx, 1);
+    };
+    if (checked) {
+      (components[permId] || [permId]).forEach((p) => {
+        add(target, p);
+        remove(opposite, p);
+      });
+    } else {
+      Object.entries(components).forEach(([composite, parts]) => {
+        if (parts.includes(permId)) remove(target, composite);
+      });
+    }
   }
 
   /**
@@ -416,62 +458,23 @@ export class WindowsPermissionsEngine {
       entry = { principalId: this.state.selectedSharePrincipalId, allow: ['read'], deny: [] };
       res.shareAcl.push(entry);
     }
-
-    const targetList = mode === 'allow' ? entry.allow : entry.deny;
-    const oppositeList = mode === 'allow' ? entry.deny : entry.allow;
-
-    const addP = (list, p) => {
-      if (!list.includes(p)) list.push(p);
-    };
-    const remP = (list, p) => {
-      const idx = list.indexOf(p);
-      if (idx !== -1) list.splice(idx, 1);
-    };
-
-    if (checked) {
-      addP(targetList, permId);
-      remP(oppositeList, permId);
-      if (mode === 'allow') {
-        if (permId === 'full') {
-          addP(targetList, 'change');
-          addP(targetList, 'read');
-          remP(oppositeList, 'change');
-          remP(oppositeList, 'read');
-        } else if (permId === 'change') {
-          addP(targetList, 'read');
-          remP(oppositeList, 'read');
-        }
-      } else {
-        if (permId === 'full') {
-          addP(targetList, 'change');
-          addP(targetList, 'read');
-          remP(oppositeList, 'change');
-          remP(oppositeList, 'read');
-        } else if (permId === 'read') {
-          addP(targetList, 'change');
-          addP(targetList, 'full');
-        }
-      }
-    } else {
-      remP(targetList, permId);
-      if (mode === 'allow') {
-        if (permId !== 'full') remP(targetList, 'full');
-        if (permId === 'read') remP(targetList, 'change');
-      }
-    }
-
-    const authEntry = res.shareAcl.find((e) => e.principalId === 'auth_users') || entry;
-    if (authEntry.allow.includes('full') && !authEntry.deny.includes('full')) {
-      res.sharePermission = 'full';
-    } else if (authEntry.allow.includes('change') && !authEntry.deny.includes('change')) {
-      res.sharePermission = 'change';
-    } else {
-      res.sharePermission = 'read';
-    }
+    this.applyCheckbox(entry, permId, mode, checked, SHARE_COMPONENTS);
+    res.sharePermission = this.shareLevelOf(res.shareAcl.find((e) => e.principalId === 'auth_users'));
 
     this.state.dirty = true;
-    this.state.statusMessage = `Permiso Share SMB actualizado (${res.sharePermission.toUpperCase()}).`;
+    this.state.statusMessage = `Permisos del recurso compartido actualizados (Authenticated Users: ${res.sharePermission.toUpperCase()}).`;
     this.notify();
+  }
+
+  /** Nivel neto (none | read | change | full) de una entrada de Share, restando lo denegado */
+  shareLevelOf(entry) {
+    if (!entry) return 'none';
+    const allowed = new Set(entry.allow.flatMap((p) => SHARE_ATOMS[p] || []));
+    entry.deny.flatMap((p) => SHARE_ATOMS[p] || []).forEach((a) => allowed.delete(a));
+    if (allowed.has('C') && allowed.has('W') && allowed.has('R')) return 'full';
+    if (allowed.has('W') && allowed.has('R')) return 'change';
+    if (allowed.has('R')) return 'read';
+    return 'none';
   }
 
   updateShareConfig(shareEnabled, sharePermission) {
@@ -503,6 +506,7 @@ export class WindowsPermissionsEngine {
     if (!res) return;
     if (!res.inheritanceDisabled) {
       res.inheritanceDisabled = true;
+      res.inheritanceMode = convertExisting ? 'd' : 'r';
       if (convertExisting) {
         res.acl.forEach((e) => {
           e.inherited = false;
@@ -515,13 +519,15 @@ export class WindowsPermissionsEngine {
         this.state.statusMessage = 'Herencia deshabilitada: se han quitado todos los permisos heredados.';
       }
     } else {
+      // Rehabilitar: vuelven las ACE de la carpeta contenedora (las explícitas se conservan)
       res.inheritanceDisabled = false;
-      res.acl.forEach((e) => {
-        if (['system', 'admins', 'users'].includes(e.principalId)) {
-          e.inherited = true;
+      res.inheritanceMode = 'e';
+      (res.parentAcl || DEFAULT_PARENT_ACL).forEach((pe) => {
+        if (!res.acl.some((e) => e.principalId === pe.principalId)) {
+          res.acl.push({ ...clone(pe), inherited: true });
         }
       });
-      this.state.statusMessage = 'Herencia NTFS rehabilitada desde la carpeta contenedora.';
+      this.state.statusMessage = `Herencia NTFS rehabilitada: se vuelven a aplicar los permisos de ${res.parentPath}.`;
     }
     this.state.dirty = true;
     this.notify();
@@ -543,6 +549,7 @@ export class WindowsPermissionsEngine {
   }
 
   applyChanges() {
+    this.savedResources = clone(this.state.resources);
     this.state.dirty = false;
     const res = this.getSelectedResource();
     this.state.statusMessage = `Cambios aplicados correctamente en ${res.path}`;
@@ -558,88 +565,69 @@ export class WindowsPermissionsEngine {
   evaluateEffectiveAccess(resource, userId, viaSmb = true) {
     const user = WIN_PRINCIPALS.find((p) => p.id === userId) || WIN_PRINCIPALS[0];
     const effectivePrincipals = new Set([user.id, ...(user.memberOf || [])]);
+    const shortName = (pid) => WIN_PRINCIPALS.find((p) => p.id === pid)?.name.split(' ')[0] || pid;
+    const atomsOf = (list, map) => new Set((list || []).flatMap((p) => map[p] || []));
 
     const matchingNtfsEntries = resource.acl.filter((e) => effectivePrincipals.has(e.principalId));
     const matchingShareEntries = (resource.shareAcl || []).filter((e) => effectivePrincipals.has(e.principalId));
 
-    let shareAllowedCaps = new Set();
-    let shareSummaryLabel = 'Sin acceso de red';
+    // 1-2. NTFS por derecho atómico: Deny explícito > Allow explícito > Deny heredado > Allow heredado
+    const ntfsAtoms = {};
+    ATOMIC_RIGHTS.forEach((atom) => {
+      const pick = (inherited, field) =>
+        matchingNtfsEntries.filter((e) => Boolean(e.inherited) === inherited && atomsOf(e[field], NTFS_ATOMS).has(atom));
+      const explicitDeny = pick(false, 'deny');
+      const explicitAllow = pick(false, 'allow');
+      const inheritedDeny = pick(true, 'deny');
+      const inheritedAllow = pick(true, 'allow');
+      if (explicitDeny.length) {
+        ntfsAtoms[atom] = { granted: false, rule: `Denegado explícito en NTFS (${shortName(explicitDeny[0].principalId)})` };
+      } else if (explicitAllow.length) {
+        ntfsAtoms[atom] = { granted: true, rule: `Permitido explícito en NTFS (${explicitAllow.map((e) => shortName(e.principalId)).join(' + ')})` };
+      } else if (inheritedDeny.length) {
+        ntfsAtoms[atom] = { granted: false, rule: `Denegado heredado en NTFS (${shortName(inheritedDeny[0].principalId)})` };
+      } else if (inheritedAllow.length) {
+        ntfsAtoms[atom] = { granted: true, rule: `Permitido heredado en NTFS (${inheritedAllow.map((e) => shortName(e.principalId)).join(' + ')})` };
+      } else {
+        ntfsAtoms[atom] = { granted: false, rule: 'Denegación implícita (ningún grupo lo concede)' };
+      }
+    });
 
+    // 3. Share: unión de lo permitido a los grupos del usuario menos lo denegado
+    let shareAtoms = new Set();
+    let shareSummaryLabel;
     if (!viaSmb) {
-      SHARE_TO_NTFS_CAPABILITIES.full.forEach((c) => shareAllowedCaps.add(c));
+      shareAtoms = new Set(ATOMIC_RIGHTS);
       shareSummaryLabel = 'Acceso Local (Omitiendo filtro SMB)';
     } else if (!resource.shareEnabled) {
       shareSummaryLabel = 'No compartido (Bloqueado en red)';
     } else {
-      const shareDenyFull = matchingShareEntries.some((e) => e.deny.includes('full'));
-      const shareDenyChange = matchingShareEntries.some((e) => e.deny.includes('change'));
-      const shareDenyRead = matchingShareEntries.some((e) => e.deny.includes('read'));
-
-      const shareAllowFull = matchingShareEntries.some((e) => e.allow.includes('full'));
-      const shareAllowChange = matchingShareEntries.some((e) => e.allow.includes('change'));
-      const shareAllowRead = matchingShareEntries.some((e) => e.allow.includes('read'));
-
-      let effectiveShareLevel = 'none';
-      if (shareDenyRead) {
-        effectiveShareLevel = 'none';
-        shareSummaryLabel = 'Denegado explícitamente en Share';
-      } else if (shareAllowFull && !shareDenyFull && !shareDenyChange) {
-        effectiveShareLevel = 'full';
-        shareSummaryLabel = 'Control total (Share)';
-      } else if ((shareAllowChange || shareAllowFull) && !shareDenyChange) {
-        effectiveShareLevel = 'change';
-        shareSummaryLabel = 'Cambiar (Lectura + Escritura)';
-      } else if (shareAllowRead || resource.sharePermission === 'read') {
-        effectiveShareLevel =
-          effectivePrincipals.has('auth_users') || effectivePrincipals.has('admins')
-            ? resource.sharePermission
-            : 'none';
-        shareSummaryLabel =
-          effectiveShareLevel === 'full'
-            ? 'Control total (Share)'
-            : effectiveShareLevel === 'change'
-              ? 'Cambiar (Share)'
-              : effectiveShareLevel === 'read'
-                ? 'Solo Lectura (Share)'
-                : 'Sin permisos en Share';
-      }
-
-      (SHARE_TO_NTFS_CAPABILITIES[effectiveShareLevel] || []).forEach((c) => shareAllowedCaps.add(c));
+      matchingShareEntries.forEach((e) => atomsOf(e.allow, SHARE_ATOMS).forEach((a) => shareAtoms.add(a)));
+      const denied = new Set();
+      matchingShareEntries.forEach((e) => atomsOf(e.deny, SHARE_ATOMS).forEach((a) => denied.add(a)));
+      denied.forEach((a) => shareAtoms.delete(a));
+      if (shareAtoms.has('C') && shareAtoms.has('W')) shareSummaryLabel = 'Control total (Share)';
+      else if (shareAtoms.has('W') && shareAtoms.has('R')) shareSummaryLabel = 'Cambiar (Share)';
+      else if (shareAtoms.has('R')) shareSummaryLabel = denied.size ? 'Solo Lectura (Share, con denegaciones)' : 'Solo Lectura (Share)';
+      else shareSummaryLabel = denied.size ? 'Denegado explícitamente en Share' : 'Sin permisos en Share';
     }
 
     const permissions = {};
     NTFS_PERMS.forEach((perm) => {
-      const explicitDenyEntries = matchingNtfsEntries.filter((e) => !e.inherited && e.deny.includes(perm.id));
-      const explicitAllowEntries = matchingNtfsEntries.filter((e) => !e.inherited && e.allow.includes(perm.id));
-      const inheritedDenyEntries = matchingNtfsEntries.filter((e) => e.inherited && e.deny.includes(perm.id));
-      const inheritedAllowEntries = matchingNtfsEntries.filter((e) => e.inherited && e.allow.includes(perm.id));
-
-      let ntfsGranted = false;
-      let ntfsRule = 'Denegación implícita (ningún grupo lo concede)';
-
-      if (explicitDenyEntries.length > 0) {
-        ntfsGranted = false;
-        const pName = WIN_PRINCIPALS.find((p) => p.id === explicitDenyEntries[0].principalId)?.name.split(' ')[0];
-        ntfsRule = `Denegado explícito en NTFS (${pName})`;
-      } else if (explicitAllowEntries.length > 0) {
-        ntfsGranted = true;
-        const pNames = explicitAllowEntries
-          .map((e) => WIN_PRINCIPALS.find((p) => p.id === e.principalId)?.name.split(' ')[0])
-          .join(' + ');
-        ntfsRule = `Permitido explícito en NTFS (${pNames})`;
-      } else if (inheritedDenyEntries.length > 0) {
-        ntfsGranted = false;
-        ntfsRule = 'Denegado heredado en NTFS';
-      } else if (inheritedAllowEntries.length > 0) {
-        ntfsGranted = true;
-        const pNames = inheritedAllowEntries
-          .map((e) => WIN_PRINCIPALS.find((p) => p.id === e.principalId)?.name.split(' ')[0])
-          .join(' + ');
-        ntfsRule = `Permitido heredado en NTFS (${pNames})`;
-      }
-
-      const shareGranted = shareAllowedCaps.has(perm.id);
+      const atoms = NTFS_ATOMS[perm.id];
+      const missingNtfs = atoms.find((a) => !ntfsAtoms[a].granted);
+      const ntfsGranted = !missingNtfs;
+      const shareGranted = atoms.every((a) => shareAtoms.has(a));
       const finalGranted = viaSmb ? ntfsGranted && shareGranted : ntfsGranted;
+
+      let ntfsRule;
+      if (missingNtfs) {
+        ntfsRule = atoms.length > 1
+          ? `${ntfsAtoms[missingNtfs].rule} sobre «${ATOMIC_LABELS[missingNtfs]}»`
+          : ntfsAtoms[missingNtfs].rule;
+      } else {
+        ntfsRule = [...new Set(atoms.map((a) => ntfsAtoms[a].rule))].join(' · ');
+      }
 
       let reason = ntfsRule;
       if (viaSmb && ntfsGranted && !shareGranted) {
@@ -658,39 +646,43 @@ export class WindowsPermissionsEngine {
 
     permissions._meta = {
       user,
-      memberGroupNames: (user.memberOf || []).map(
-        (gid) => WIN_PRINCIPALS.find((p) => p.id === gid)?.name.split(' ')[0] || gid
-      ),
+      memberGroupNames: (user.memberOf || []).map(shortName),
       shareSummaryLabel,
     };
 
     return permissions;
   }
 
+  /**
+   * Comando icacls equivalente. El permiso va dentro de las comillas ("DOMINIO\\Grupo:(M)") para que
+   * funcione igual en CMD y en PowerShell.
+   */
   generateIcaclsCommand(resource) {
+    const code = (list) => {
+      if (list.includes('full')) return 'F';
+      if (list.includes('modify')) return 'M';
+      const parts = [];
+      if (list.includes('read_exec')) parts.push('RX');
+      else if (list.includes('read')) parts.push('R');
+      if (list.includes('write')) parts.push('W');
+      return parts.join(',');
+    };
+
     const parts = [`icacls "${resource.path}"`];
-    parts.push(resource.inheritanceDisabled ? '/inheritance:d' : '/inheritance:e');
+    if (resource.inheritanceDisabled) {
+      parts.push(resource.inheritanceMode === 'r' ? '/inheritance:r' : '/inheritance:d');
+    } else {
+      parts.push('/inheritance:e');
+    }
 
     resource.acl.forEach((entry) => {
       if (entry.inherited) return;
       const pObj = WIN_PRINCIPALS.find((p) => p.id === entry.principalId);
-      const shortName = pObj ? pObj.domain : entry.principalId;
-
-      if (entry.allow.length > 0) {
-        let code = '(R)';
-        if (entry.allow.includes('full')) code = '(F)';
-        else if (entry.allow.includes('modify')) code = '(M)';
-        else if (entry.allow.includes('read_exec') && entry.allow.includes('write')) code = '(RX,W)';
-        else if (entry.allow.includes('read_exec')) code = '(RX)';
-        parts.push(`/grant "${shortName}":${code}`);
-      }
-      if (entry.deny.length > 0) {
-        let dCode = '(W)';
-        if (entry.deny.includes('full')) dCode = '(F)';
-        else if (entry.deny.includes('modify') && entry.deny.includes('write')) dCode = '(M,W)';
-        else if (entry.deny.includes('read')) dCode = '(R)';
-        parts.push(`/deny "${shortName}":${dCode}`);
-      }
+      const name = pObj ? pObj.domain : entry.principalId;
+      const allowCode = code(entry.allow);
+      const denyCode = code(entry.deny);
+      if (allowCode) parts.push(`/grant "${name}:(${allowCode})"`);
+      if (denyCode) parts.push(`/deny "${name}:(${denyCode})"`);
     });
 
     return parts.join(' ');
