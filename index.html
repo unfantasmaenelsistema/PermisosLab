@@ -31,6 +31,10 @@
     <link rel="stylesheet" href="./css/linux.css" />
   </head>
   <body>
+    <div class="sim-disclaimer" role="note">
+      <strong>Simulador educativo</strong> de <a href="https://www.unfantasmaenelsistema.com/" target="_blank" rel="noopener noreferrer">Un Fantasma en el Sistema</a>.
+      No es un servidor real ni una página de inicio de sesión de Microsoft o Canonical: no escribas aquí contraseñas ni datos reales.
+    </div>
     <!-- ====================================================================
           BARRA SUPERIOR DE LABORATORIO (3-Zone Top Bar Contract)
           ==================================================================== -->
@@ -73,7 +77,7 @@
           ==================================================================== -->
     <main id="view-selector" class="os-selector-screen">
       <!-- Lado Izquierdo: Windows Server 2022 -->
-      <section class="os-login-pane win-pane" aria-label="Iniciar sesión en Windows Server">
+      <section class="os-login-pane win-pane" aria-label="Entrar al simulador de Windows Server">
         <div class="os-pane-header">
           <span>Microsoft Windows Server 2022 Datacenter</span>
           <span>NTFS · ACL · SMB Share</span>
@@ -90,24 +94,9 @@
           <h1 class="win-login-user">Administrador</h1>
           <p class="win-login-domain">DOMINIO: WIN-SRV01\Administrator</p>
 
-          <div class="win-login-input-row">
-            <input
-              id="win-pin-input"
-              type="password"
-              class="win-login-input"
-              value="••••••••••••"
-              aria-label="Contraseña de Administrador de Windows"
-              placeholder="Contraseña o PIN"
-            />
-            <button
-              type="button"
-              id="btn-submit-win-pin"
-              class="win-login-submit"
-              title="Iniciar sesión en Windows Server"
-            >
-              &#10140;
-            </button>
-          </div>
+          <p class="win-login-note">
+            Simulador educativo: aquí no se pide ninguna contraseña. Pulsa el botón para entrar.
+          </p>
 
           <button type="button" id="btn-enter-windows" class="win-enter-btn">
             Entrar a Windows Server
@@ -125,7 +114,7 @@
       </section>
 
       <!-- Lado Derecho: Ubuntu Server 24.04 LTS -->
-      <section class="os-login-pane linux-pane" aria-label="Iniciar sesión en Ubuntu Server">
+      <section class="os-login-pane linux-pane" aria-label="Entrar al simulador de Ubuntu Server">
         <div class="os-pane-header">
           <span>Ubuntu Server 24.04.1 LTS (Noble Numbat)</span>
           <span>POSIX · Octal · SUID/SGID/Sticky</span>

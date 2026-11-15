@@ -74,10 +74,6 @@ class PermisosLabApp {
 
     // Dual-OS Login Selector triggers
     document.getElementById('btn-enter-windows')?.addEventListener('click', () => this.switchEnvironment('windows'));
-    document.getElementById('btn-submit-win-pin')?.addEventListener('click', () => this.switchEnvironment('windows'));
-    document.getElementById('win-pin-input')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this.switchEnvironment('windows');
-    });
     document.getElementById('btn-enter-linux')?.addEventListener('click', () => this.switchEnvironment('linux'));
 
     // Linux Terminal Input & Quick Actions
